@@ -45,8 +45,17 @@ public class CampaignStatService {
     for (SPCampaignReport report : reports) {
       Long campaignId = report.getCampaignId();
 
-      campaignAnalyticMap.computeIfAbsent(campaignId, k -> new SPCampaignStatistic(report))
-          .add(new SPCampaignStatistic(report));
+      //The error is that if there was no statistic, we added it based on the report and then added the same statistic to it.
+      //campaignAnalyticMap.computeIfAbsent(campaignId, k -> new SPCampaignStatistic(report))
+      //    .add(new SPCampaignStatistic(report));
+
+
+      /*
+      I changed it so that if there is no statistics, we create a new one based on the report,
+      and if there is, we add new data to it based on the report.
+      */
+      campaignAnalyticMap.compute(campaignId, (k, v) -> (v == null) ?
+              new SPCampaignStatistic(report) : v.add(new SPCampaignStatistic(report)));
     }
 
     // Get all enabled SP campaigns by profile and portfolio
